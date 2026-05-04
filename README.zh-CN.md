@@ -127,6 +127,37 @@ fc -R ~/.zsh_history
 fc -W ~/.zsh_history
 ```
 
+## 可选：推荐的 zsh history 配置
+
+`histprune` 不要求修改 zsh 配置，但下面这些设置可以让 history 文件更适合后续清理：
+
+```zsh
+# zsh history
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=50000
+
+setopt EXTENDED_HISTORY        # 保存时间戳
+setopt APPEND_HISTORY          # 追加写入历史文件
+setopt INC_APPEND_HISTORY      # 命令执行后立即写入
+```
+
+其中 `EXTENDED_HISTORY` 会保存时间戳，让 `--before` / `--between` 这类时间范围规则更有用；`APPEND_HISTORY` 和 `INC_APPEND_HISTORY` 可以减少多个终端覆盖 history 的风险，让文件更接近当前执行状态。
+
+如果你希望 zsh 自己减少之后产生的重复历史，也可以额外开启：
+
+```zsh
+setopt HIST_IGNORE_DUPS        # 连续重复命令不记录
+setopt HIST_IGNORE_ALL_DUPS    # 新命令重复时删除旧记录
+setopt HIST_SAVE_NO_DUPS       # 保存到文件时不写重复项
+setopt HIST_EXPIRE_DUPS_FIRST  # 历史满了优先删除重复项
+setopt HIST_FIND_NO_DUPS       # 搜索历史时不显示重复项
+setopt HIST_REDUCE_BLANKS      # 压缩多余空格
+setopt HIST_IGNORE_SPACE       # 以空格开头的命令不记录
+```
+
+这些选项不能保证 `~/.zsh_history` 文件里永远没有重复项。已有重复项、配置生效前的历史、多终端并发写入，仍然可能被 `histprune prune --dedupe` 扫描出来。建议把 zsh 配置理解为减少新重复，`histprune` 负责对磁盘 history 做可预览、可备份、可恢复的清理。
+
 ## 备份与恢复
 
 列出备份：

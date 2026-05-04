@@ -127,6 +127,37 @@ If multiple zsh terminals are open, consider writing the latest in-memory histor
 fc -W ~/.zsh_history
 ```
 
+## Optional zsh History Configuration
+
+`histprune` does not require changing your zsh configuration, but these settings make the history file easier to clean later:
+
+```zsh
+# zsh history
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=50000
+SAVEHIST=50000
+
+setopt EXTENDED_HISTORY        # Store timestamps
+setopt APPEND_HISTORY          # Append to the history file
+setopt INC_APPEND_HISTORY      # Write each command immediately after it runs
+```
+
+`EXTENDED_HISTORY` stores timestamps, making `--before` / `--between` range rules more useful. `APPEND_HISTORY` and `INC_APPEND_HISTORY` reduce the chance of multiple terminals overwriting each other's history and keep the file closer to the current shell state.
+
+If you want zsh to reduce future duplicate history entries on its own, you can also enable:
+
+```zsh
+setopt HIST_IGNORE_DUPS        # Do not record consecutive duplicate commands
+setopt HIST_IGNORE_ALL_DUPS    # Remove older duplicates when a new duplicate is added
+setopt HIST_SAVE_NO_DUPS       # Do not write duplicate entries when saving history
+setopt HIST_EXPIRE_DUPS_FIRST  # Expire duplicate entries first when history is full
+setopt HIST_FIND_NO_DUPS       # Hide duplicates when searching history
+setopt HIST_REDUCE_BLANKS      # Compress extra whitespace
+setopt HIST_IGNORE_SPACE       # Do not record commands that start with a space
+```
+
+These options do not guarantee that `~/.zsh_history` will never contain duplicates. Existing entries, history written before the configuration took effect, and concurrent writes from multiple terminals may still be reported by `histprune prune --dedupe`. Treat the zsh configuration as a way to reduce new duplicates, while `histprune` provides previewable, backed-up, and recoverable cleanup for the history file on disk.
+
 ## Backups and Restore
 
 List backups:
