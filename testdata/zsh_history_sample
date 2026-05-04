@@ -1,0 +1,5 @@
+: 1767225600:0;git status
+: 1767225660:0;go test ./...
+ls -la
+: 1767225720:1;git status
+: bad:line;malformed command

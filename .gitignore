@@ -1,0 +1,43 @@
+# Binary
+/histprune
+/histprune.exe
+
+# Secrets
+.env
+.example.env.local
+
+# Local config
+/configs/config.yaml
+/configs/*.local.yaml
+
+# Data
+*.histprune-backup-*
+
+# Build artifacts
+/bin/
+/build/
+/dist/
+*.test
+coverage.out
+coverage.html
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+
+# Worktrees
+/.worktrees/
+/.claude/worktrees/
+
+# Local/private project assets
+/.claude/
+/docs/superpowers/
+/CLAUDE.md
+/.superpowers/
