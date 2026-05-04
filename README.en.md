@@ -30,10 +30,10 @@ go install github.com/walker1211/histprune/cmd/histprune@latest
 histprune version
 ```
 
-For local development, you can also build a binary:
+For local development, you can build a binary with the helper script:
 
 ```bash
-go build -o histprune ./cmd/histprune
+./build.sh
 ./histprune version
 ```
 

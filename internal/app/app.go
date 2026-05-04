@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"io"
 	"sort"
-	"strings"
 
 	"github.com/walker1211/histprune/internal/cli"
 	"github.com/walker1211/histprune/internal/history"
 	"github.com/walker1211/histprune/internal/prune"
+	"github.com/walker1211/histprune/internal/render"
 	"github.com/walker1211/histprune/internal/report"
 	"github.com/walker1211/histprune/internal/storage"
 )
@@ -61,8 +61,7 @@ func (a App) analyze(ctx context.Context, opts cli.AnalyzeOptions) error {
 		if opts.JSON {
 			return writeJSON(a.stdout, summary)
 		}
-		_, err = io.WriteString(a.stdout, renderAnalyzeText(summary))
-		return err
+		return writeAnalyzeText(a.stdout, summary)
 	})
 }
 
@@ -107,8 +106,7 @@ func (a App) prune(ctx context.Context, opts cli.PruneOptions) error {
 			_, err = fmt.Fprintln(a.stdout, text)
 			return err
 		}
-		_, err = io.WriteString(a.stdout, report.Text(summary))
-		return err
+		return report.WriteText(a.stdout, summary)
 	})
 }
 
@@ -168,8 +166,7 @@ func (a App) restore(ctx context.Context, opts cli.RestoreOptions) error {
 		if err != nil {
 			return err
 		}
-		_, err = fmt.Fprintf(a.stdout, "Restored: %s\nCurrent backup: %s\n", target, currentBackup)
-		return err
+		return writeRestoreText(a.stdout, target, currentBackup)
 	})
 }
 
@@ -186,7 +183,8 @@ func (a App) version(ctx context.Context) error {
 func (a App) run(fn func() error) error {
 	err := fn()
 	if err != nil {
-		_, _ = fmt.Fprintf(a.stderr, "error: %v\n", err)
+		content := render.NewContent(a.stderr)
+		content.Writef("error: %v\n", err)
 	}
 	return err
 }
@@ -293,23 +291,30 @@ func formatName(format history.Format) string {
 	}
 }
 
-func renderAnalyzeText(summary analyzeSummary) string {
-	var b strings.Builder
-	fmt.Fprintf(&b, "Scanned: %d\n", summary.Scanned)
-	b.WriteString("Formats:\n")
+func writeAnalyzeText(w io.Writer, summary analyzeSummary) error {
+	content := render.NewContent(w)
+	content.Writef("Scanned: %d\n", summary.Scanned)
+	content.WriteString("Formats:\n")
 	for _, name := range []string{"zsh_extended", "plain", "malformed"} {
-		fmt.Fprintf(&b, "  %s: %d\n", name, summary.Formats[name])
+		content.Writef("  %s: %d\n", name, summary.Formats[name])
 	}
-	fmt.Fprintf(&b, "Duplicate commands: %d\n", summary.DuplicateCommands)
-	b.WriteString("Top commands:\n")
+	content.Writef("Duplicate commands: %d\n", summary.DuplicateCommands)
+	content.WriteString("Top commands:\n")
 	if len(summary.TopCommands) == 0 {
-		b.WriteString("  (none)\n")
-		return b.String()
+		content.WriteString("  (none)\n")
+		return content.Err()
 	}
 	for _, top := range summary.TopCommands {
-		fmt.Fprintf(&b, "  %s: %d\n", top.Command, top.Count)
+		content.Writef("  %s: %d\n", top.Command, top.Count)
 	}
-	return b.String()
+	return content.Err()
+}
+
+func writeRestoreText(w io.Writer, restoredPath, currentBackupPath string) error {
+	content := render.NewContent(w)
+	content.Writef("Restored: %s\n", restoredPath)
+	content.Writef("Current backup: %s\n", currentBackupPath)
+	return content.Err()
 }
 
 func writeJSON(w io.Writer, payload any) error {

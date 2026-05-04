@@ -2,6 +2,7 @@ package report
 
 import (
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 
@@ -110,6 +111,24 @@ func TestTextIncludesRemovedEntryDetails(t *testing.T) {
 			t.Fatalf("text report missing %q in:\n%s", want, text)
 		}
 	}
+}
+
+func TestWriteTextReturnsWriterError(t *testing.T) {
+	wantErr := errors.New("write failed")
+
+	err := WriteText(failingWriter{err: wantErr}, Summary{Scanned: 1})
+
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("WriteText() error = %v, want %v", err, wantErr)
+	}
+}
+
+type failingWriter struct {
+	err error
+}
+
+func (w failingWriter) Write([]byte) (int, error) {
+	return 0, w.err
 }
 
 func TestJSONIncludesTotalsAndRemovedEntries(t *testing.T) {

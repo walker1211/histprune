@@ -1,11 +1,12 @@
 package report
 
 import (
-	"fmt"
+	"io"
 	"sort"
 	"strings"
 
 	"github.com/walker1211/histprune/internal/prune"
+	"github.com/walker1211/histprune/internal/render"
 )
 
 // Summary is the report model shared by text, JSON, and app-level integration.
@@ -60,40 +61,46 @@ func FromDecisions(decisions []prune.Decision, dryRun bool, backupPath string) S
 // Text renders a compact human-readable report.
 func Text(summary Summary) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "Scanned: %d\n", summary.Scanned)
-	fmt.Fprintf(&b, "Removed: %d\n", summary.Removed)
-	fmt.Fprintf(&b, "Kept: %d\n", summary.Kept)
+	_ = WriteText(&b, summary)
+	return b.String()
+}
+
+func WriteText(w io.Writer, summary Summary) error {
+	content := render.NewContent(w)
+	content.Writef("Scanned: %d\n", summary.Scanned)
+	content.Writef("Removed: %d\n", summary.Removed)
+	content.Writef("Kept: %d\n", summary.Kept)
 	if summary.DryRun {
-		b.WriteString("Mode: dry-run\n")
+		content.WriteString("Mode: dry-run\n")
 	} else {
-		b.WriteString("Mode: write\n")
+		content.WriteString("Mode: write\n")
 	}
 	if summary.BackupPath != "" {
-		fmt.Fprintf(&b, "Backup: %s\n", summary.BackupPath)
+		content.Writef("Backup: %s\n", summary.BackupPath)
 	}
 	if len(summary.RuleCounts) > 0 {
-		b.WriteString("Rules:\n")
+		content.WriteString("Rules:\n")
 		keys := make([]string, 0, len(summary.RuleCounts))
 		for key := range summary.RuleCounts {
 			keys = append(keys, key)
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
-			fmt.Fprintf(&b, "  %s: %d\n", key, summary.RuleCounts[key])
+			content.Writef("  %s: %d\n", key, summary.RuleCounts[key])
 		}
 	}
 	if len(summary.RemovedEntries) > 0 {
-		b.WriteString("Removed entries:\n")
+		content.WriteString("Removed entries:\n")
 		for _, entry := range summary.RemovedEntries {
-			fmt.Fprintf(&b, "  Line %d: %s\n", entry.LineNo, entry.Command)
+			content.Writef("  Line %d: %s\n", entry.LineNo, entry.Command)
 			for _, reason := range entry.Reasons {
 				if reason.Detail == "" {
-					fmt.Fprintf(&b, "    - %s\n", reason.Type)
+					content.Writef("    - %s\n", reason.Type)
 					continue
 				}
-				fmt.Fprintf(&b, "    - %s: %s\n", reason.Type, reason.Detail)
+				content.Writef("    - %s: %s\n", reason.Type, reason.Detail)
 			}
 		}
 	}
-	return b.String()
+	return content.Err()
 }

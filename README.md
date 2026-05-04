@@ -2,7 +2,7 @@
 
 Safe, explainable shell history cleanup in Go.
 
-[中文文档](./README.zh-CN.md) | [English Documentation](./README.en.md)
+[中文](./README.zh-CN.md) | [English](./README.en.md)
 
 ## Features
 

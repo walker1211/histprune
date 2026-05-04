@@ -30,10 +30,10 @@ go install github.com/walker1211/histprune/cmd/histprune@latest
 histprune version
 ```
 
-仓库本地开发时也可以构建二进制：
+仓库本地开发时可以用脚本构建二进制：
 
 ```bash
-go build -o histprune ./cmd/histprune
+./build.sh
 ./histprune version
 ```
 
