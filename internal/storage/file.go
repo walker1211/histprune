@@ -63,11 +63,21 @@ func syncDirectory(dir string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	if err := f.Sync(); err != nil && !isUnsupportedSyncError(err) {
-		return err
+	return syncAndClose(f)
+}
+
+type syncCloser interface {
+	Sync() error
+	Close() error
+}
+
+func syncAndClose(f syncCloser) error {
+	syncErr := f.Sync()
+	closeErr := f.Close()
+	if syncErr != nil && !isUnsupportedSyncError(syncErr) {
+		return errors.Join(syncErr, closeErr)
 	}
-	return nil
+	return closeErr
 }
 
 func isUnsupportedSyncError(err error) bool {

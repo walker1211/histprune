@@ -17,13 +17,7 @@
 
 ## 安装
 
-#### 方式一：从源码运行
-
-```bash
-go run ./cmd/histprune version
-```
-
-#### 方式二：安装到本机
+安装 CLI：
 
 ```bash
 go install github.com/walker1211/histprune/cmd/histprune@latest
@@ -39,63 +33,80 @@ histprune version
 
 ## 快速开始
 
-分析 zsh history：
+分析默认 zsh history 文件：
 
 ```bash
-histprune analyze --file ~/.zsh_history
+histprune analyze
 ```
 
-预览去重结果，不修改文件：
+先预览清理结果：
 
 ```bash
-histprune prune --file ~/.zsh_history --dedupe
+histprune prune --dedupe
 ```
 
-确认后写入：
+确认预览后，用同一条命令加 `--write` 实际写入：
 
 ```bash
-histprune prune --file ~/.zsh_history --dedupe --write
+histprune prune --dedupe --write
+```
+
+默认情况下，`histprune` 会优先使用 `$HISTFILE`，否则回退到 `~/.zsh_history`。只有清理其他 history 文件时才需要 `--file PATH`：
+
+```bash
+histprune analyze --file /path/to/history
+```
+
+查看所有命令和参数：
+
+```bash
+histprune --help
+```
+
+## 清理规则
+
+所有 `prune` 命令默认只预览，不会修改文件。先看报告，确认后再给同一条命令追加 `--write`。
+
+去重并保留最后一次出现：
+
+```bash
+histprune prune --dedupe
 ```
 
 删除包含指定文本的历史：
 
 ```bash
-histprune prune --file ~/.zsh_history --contains 'gti status'
-histprune prune --file ~/.zsh_history --contains 'gti status' --write
+histprune prune --contains 'gti status'
 ```
 
 删除匹配正则的历史：
 
 ```bash
-histprune prune --file ~/.zsh_history --regex 'token=[^ ]+'
+histprune prune --regex 'token=[^ ]+'
 ```
 
 按行号删除：
 
 ```bash
-histprune prune --file ~/.zsh_history --line 1287
+histprune prune --line 1287
 ```
 
 按时间删除：
 
 ```bash
-histprune prune --file ~/.zsh_history --before 2024-01-01
-histprune prune --file ~/.zsh_history --between 2024-01-01 2024-06-30
+histprune prune --before 2024-01-01
+histprune prune --between 2024-01-01 2024-06-30
 ```
 
 输出 JSON 报告：
 
 ```bash
-histprune prune --file ~/.zsh_history --dedupe --json
+histprune prune --dedupe --json
 ```
 
 ## 安全模型
 
-`prune` 默认是 dry-run，不会修改历史文件。只有显式传入 `--write` 时才会落盘：
-
-```bash
-histprune prune --file ~/.zsh_history --dedupe --write
-```
+`prune` 默认是 dry-run，不会修改历史文件。只有显式传入 `--write` 时才会落盘。
 
 写入时会：
 
@@ -121,33 +132,22 @@ fc -W ~/.zsh_history
 列出备份：
 
 ```bash
-histprune backups --file ~/.zsh_history
+histprune backups
 ```
 
 恢复最近一次备份：
 
 ```bash
-histprune restore latest --file ~/.zsh_history
+histprune restore latest
 ```
 
 恢复指定备份：
 
 ```bash
-histprune restore /path/to/.zsh_history.histprune-backup-20260504T120000 --file ~/.zsh_history
+histprune restore /path/to/.zsh_history.histprune-backup-20260504T120000
 ```
 
 恢复前会先备份当前 history 文件。
-
-## 配置
-
-当前版本暂不读取配置文件，所有行为都通过 CLI flags 配置。
-
-因此本仓库现在不放 `configs/config.example.yaml`，避免出现“看起来支持配置、实际还没接入”的误导。后续如果加入结构化规则配置，会采用：
-
-- `configs/config.example.yaml`：提交到版本库的模板配置
-- `configs/config.yaml`：本地真实配置，不提交到版本库
-
-敏感信息不应写入 history，也不需要放在本项目配置中；如果未来确实需要敏感配置，会使用 `.example.env` + 本地忽略的 `.env`。
 
 ## 开发 / 测试
 

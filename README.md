@@ -16,12 +16,31 @@ Safe, explainable shell history cleanup in Go.
 
 ## Quick Start
 
+Install:
+
 ```bash
-go run ./cmd/histprune version
-go run ./cmd/histprune analyze --file ~/.zsh_history
-go run ./cmd/histprune prune --file ~/.zsh_history --dedupe
-go run ./cmd/histprune prune --file ~/.zsh_history --dedupe --write
+go install github.com/walker1211/histprune/cmd/histprune@latest
 ```
+
+Analyze your default zsh history file:
+
+```bash
+histprune analyze
+```
+
+Preview cleanup first:
+
+```bash
+histprune prune --dedupe
+```
+
+Apply the cleanup after reviewing the preview:
+
+```bash
+histprune prune --dedupe --write
+```
+
+By default, `histprune` uses `$HISTFILE`, then falls back to `~/.zsh_history`. Use `--file PATH` only when you want to target another history file.
 
 After writing changes to an active zsh history file, reload it in your current shell:
 
@@ -29,14 +48,11 @@ After writing changes to an active zsh history file, reload it in your current s
 fc -R ~/.zsh_history
 ```
 
-## Configuration
+Show all commands and flags:
 
-`histprune` does not read a config file yet. The current version is configured entirely through CLI flags.
-
-If structured configuration is added later, the repository will use:
-
-- `configs/config.example.yaml` for committed template config
-- `configs/config.yaml` for local ignored config
+```bash
+histprune --help
+```
 
 ## License
 

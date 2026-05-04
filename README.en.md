@@ -17,13 +17,7 @@
 
 ## Installation
 
-#### Option 1: Run from source
-
-```bash
-go run ./cmd/histprune version
-```
-
-#### Option 2: Install locally
+Install the CLI:
 
 ```bash
 go install github.com/walker1211/histprune/cmd/histprune@latest
@@ -39,63 +33,80 @@ For local development, you can build a binary with the helper script:
 
 ## Quick Start
 
-Analyze zsh history:
+Analyze your default zsh history file:
 
 ```bash
-histprune analyze --file ~/.zsh_history
+histprune analyze
 ```
 
-Preview duplicate cleanup without writing:
+Preview cleanup first:
 
 ```bash
-histprune prune --file ~/.zsh_history --dedupe
+histprune prune --dedupe
 ```
 
-Apply after reviewing the preview:
+Apply the same cleanup after reviewing the preview:
 
 ```bash
-histprune prune --file ~/.zsh_history --dedupe --write
+histprune prune --dedupe --write
+```
+
+By default, `histprune` uses `$HISTFILE`, then falls back to `~/.zsh_history`. Use `--file PATH` only when targeting another history file:
+
+```bash
+histprune analyze --file /path/to/history
+```
+
+Show all commands and flags:
+
+```bash
+histprune --help
+```
+
+## Prune Rules
+
+All `prune` commands are previews unless `--write` is explicitly passed. Review the report first, then add `--write` to the same command to modify the file.
+
+Remove duplicates while keeping the latest occurrence:
+
+```bash
+histprune prune --dedupe
 ```
 
 Drop entries containing literal text:
 
 ```bash
-histprune prune --file ~/.zsh_history --contains 'gti status'
-histprune prune --file ~/.zsh_history --contains 'gti status' --write
+histprune prune --contains 'gti status'
 ```
 
 Drop entries matching a regex:
 
 ```bash
-histprune prune --file ~/.zsh_history --regex 'token=[^ ]+'
+histprune prune --regex 'token=[^ ]+'
 ```
 
 Drop by line number:
 
 ```bash
-histprune prune --file ~/.zsh_history --line 1287
+histprune prune --line 1287
 ```
 
 Drop by date:
 
 ```bash
-histprune prune --file ~/.zsh_history --before 2024-01-01
-histprune prune --file ~/.zsh_history --between 2024-01-01 2024-06-30
+histprune prune --before 2024-01-01
+histprune prune --between 2024-01-01 2024-06-30
 ```
 
 Emit a JSON report:
 
 ```bash
-histprune prune --file ~/.zsh_history --dedupe --json
+histprune prune --dedupe --json
 ```
 
 ## Safety Model
 
-`prune` is a dry-run unless `--write` is explicitly passed:
-
-```bash
-histprune prune --file ~/.zsh_history --dedupe --write
-```
+`prune` is a dry-run unless `--write` is explicitly passed.
 
 On write, `histprune` will:
 
@@ -121,33 +132,22 @@ fc -W ~/.zsh_history
 List backups:
 
 ```bash
-histprune backups --file ~/.zsh_history
+histprune backups
 ```
 
 Restore the latest backup:
 
 ```bash
-histprune restore latest --file ~/.zsh_history
+histprune restore latest
 ```
 
 Restore an explicit backup:
 
 ```bash
-histprune restore /path/to/.zsh_history.histprune-backup-20260504T120000 --file ~/.zsh_history
+histprune restore /path/to/.zsh_history.histprune-backup-20260504T120000
 ```
 
 Restoring creates a backup of the current history file first.
-
-## Configuration
-
-`histprune` does not read a config file yet. The current version is configured entirely through CLI flags.
-
-This repository intentionally does not include `configs/config.example.yaml` yet, because a template config would imply config-file support that is not implemented. If structured rule configuration is added later, the layout will be:
-
-- `configs/config.example.yaml`: committed template config
-- `configs/config.yaml`: local ignored config
-
-Sensitive data should not be stored in shell history or project config. If future features require secrets, the project will use `.example.env` plus a local ignored `.env`.
 
 ## Development / Testing
 

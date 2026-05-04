@@ -35,6 +35,7 @@ func NewRunners(stdout, stderr io.Writer) cli.Runners {
 		Backups: app.backups,
 		Restore: app.restore,
 		Version: app.version,
+		Help:    app.help,
 	}
 }
 
@@ -180,6 +181,16 @@ func (a App) version(ctx context.Context) error {
 	})
 }
 
+func (a App) help(ctx context.Context) error {
+	return a.run(func() error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		_, err := io.WriteString(a.stdout, usageText())
+		return err
+	})
+}
+
 func (a App) run(fn func() error) error {
 	err := fn()
 	if err != nil {
@@ -289,6 +300,28 @@ func formatName(format history.Format) string {
 	default:
 		return "plain"
 	}
+}
+
+func usageText() string {
+	return `Safe, explainable shell history cleanup in Go.
+
+Usage:
+  histprune <command> [flags]
+
+Commands:
+  histprune analyze                  Analyze the default zsh history file
+  histprune prune --dedupe           Preview duplicate removal
+  histprune prune --dedupe --write   Apply duplicate removal after review
+  histprune backups                  List backups for the default history file
+  histprune restore latest           Restore the latest backup
+  histprune version                  Print the version
+  histprune --help                   Show this help
+
+Flags:
+  --file PATH                        Override the history file
+  --json                             Emit JSON for analyze, prune, or backups
+  --write                            Apply prune changes; prune is dry-run by default
+`
 }
 
 func writeAnalyzeText(w io.Writer, summary analyzeSummary) error {

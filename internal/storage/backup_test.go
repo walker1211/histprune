@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -61,6 +62,40 @@ func TestReadFileAndAtomicWriteContentAndPermissions(t *testing.T) {
 	if got := info.Mode().Perm(); got != 0o640 {
 		t.Fatalf("permissions = %o, want 640", got)
 	}
+}
+
+func TestSyncAndCloseReturnsCloseError(t *testing.T) {
+	wantErr := errors.New("close failed")
+
+	err := syncAndClose(syncCloseStub{closeErr: wantErr})
+
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("syncAndClose() error = %v, want %v", err, wantErr)
+	}
+}
+
+func TestSyncAndCloseJoinsSyncAndCloseErrors(t *testing.T) {
+	syncErr := errors.New("sync failed")
+	closeErr := errors.New("close failed")
+
+	err := syncAndClose(syncCloseStub{syncErr: syncErr, closeErr: closeErr})
+
+	if !errors.Is(err, syncErr) || !errors.Is(err, closeErr) {
+		t.Fatalf("syncAndClose() error = %v, want sync and close errors", err)
+	}
+}
+
+type syncCloseStub struct {
+	syncErr  error
+	closeErr error
+}
+
+func (s syncCloseStub) Sync() error {
+	return s.syncErr
+}
+
+func (s syncCloseStub) Close() error {
+	return s.closeErr
 }
 
 func TestCreateBackupWritesContentWithTimestampedName(t *testing.T) {

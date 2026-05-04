@@ -49,6 +49,7 @@ type Runners struct {
 	Backups func(context.Context, BackupsOptions) error
 	Restore func(context.Context, RestoreOptions) error
 	Version func(context.Context) error
+	Help    func(context.Context) error
 }
 
 func Run(ctx context.Context, args []string, runners Runners) int {
@@ -68,6 +69,8 @@ func Run(ctx context.Context, args []string, runners Runners) int {
 		err = runRestore(ctx, args[1:], runners.Restore)
 	case "version":
 		err = callVersion(ctx, runners.Version)
+	case "help", "--help", "-h":
+		err = runHelp(ctx, args[1:], runners.Help)
 	default:
 		return ExitUsage
 	}
@@ -202,6 +205,16 @@ func runRestore(ctx context.Context, args []string, runner func(context.Context,
 }
 
 func callVersion(ctx context.Context, runner func(context.Context) error) error {
+	if runner == nil {
+		return nil
+	}
+	return runner(ctx)
+}
+
+func runHelp(ctx context.Context, args []string, runner func(context.Context) error) error {
+	if len(args) != 0 {
+		return errUsage
+	}
 	if runner == nil {
 		return nil
 	}

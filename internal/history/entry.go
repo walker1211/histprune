@@ -33,6 +33,10 @@ func (e Entry) Serialize() string {
 		if e.Timestamp != nil && e.Duration != nil {
 			return ": " + strconv.FormatInt(*e.Timestamp, 10) + ":" + strconv.Itoa(*e.Duration) + ";" + e.Command
 		}
+		return e.Command
+	case FormatPlain, FormatMalformed:
+		return e.Command
+	default:
+		return e.Command
 	}
-	return e.Command
 }

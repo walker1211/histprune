@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -145,6 +146,29 @@ func TestVersionCallsRunner(t *testing.T) {
 	}
 	if !called {
 		t.Fatal("version runner was not called")
+	}
+}
+
+func TestHelpAliasesCallRunner(t *testing.T) {
+	for _, args := range [][]string{{"help"}, {"--help"}, {"-h"}} {
+		t.Run(strings.Join(args, " "), func(t *testing.T) {
+			called := false
+			r := Runners{
+				Help: func(ctx context.Context) error {
+					called = true
+					return nil
+				},
+			}
+
+			code := Run(context.Background(), args, r)
+
+			if code != 0 {
+				t.Fatalf("Run returned code %d, want 0", code)
+			}
+			if !called {
+				t.Fatal("help runner was not called")
+			}
+		})
 	}
 }
 

@@ -24,6 +24,27 @@ func TestVersionPrintsCLIVersion(t *testing.T) {
 	}
 }
 
+func TestHelpPrintsUsage(t *testing.T) {
+	var out bytes.Buffer
+	runners := NewRunners(&out, nil)
+
+	if err := runners.Help(context.Background()); err != nil {
+		t.Fatalf("Help returned error: %v", err)
+	}
+	text := out.String()
+	for _, want := range []string{
+		"Safe, explainable shell history cleanup in Go.",
+		"histprune analyze",
+		"histprune prune --dedupe",
+		"histprune prune --dedupe --write",
+		"histprune --help",
+	} {
+		if !strings.Contains(text, want) {
+			t.Fatalf("help output missing %q:\n%s", want, text)
+		}
+	}
+}
+
 func TestAnalyzeTextIncludesCountsAndTopCommand(t *testing.T) {
 	historyPath := copySampleHistory(t)
 	var out, errOut bytes.Buffer
