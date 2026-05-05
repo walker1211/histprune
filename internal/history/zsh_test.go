@@ -43,6 +43,69 @@ func TestParseLinePlainHistory(t *testing.T) {
 	}
 }
 
+func TestParseLineUnmetafiesZshCommandBytes(t *testing.T) {
+	metafiedCommand := "echo 中" + string([]byte{0xe6, zshMetaByte, 0xb6, zshMetaByte, 0xa7})
+	timestamp := int64(1714752000)
+	duration := 0
+	tests := []struct {
+		name string
+		line string
+		want Entry
+	}{
+		{
+			name: "extended",
+			line: ": 1714752000:0;" + metafiedCommand,
+			want: Entry{
+				Raw:       ": 1714752000:0;" + metafiedCommand,
+				Command:   "echo 中文",
+				Timestamp: &timestamp,
+				Duration:  &duration,
+				Format:    FormatZshExtended,
+				LineNo:    4,
+			},
+		},
+		{
+			name: "plain",
+			line: metafiedCommand,
+			want: Entry{
+				Raw:     metafiedCommand,
+				Command: "echo 中文",
+				Format:  FormatPlain,
+				LineNo:  4,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			entry := ParseLine(4, tt.line)
+			if !reflect.DeepEqual(entry, tt.want) {
+				t.Fatalf("ParseLine() = %#v, want %#v", entry, tt.want)
+			}
+			if got := entry.Serialize(); got != tt.line {
+				t.Fatalf("Serialize() = %q, want %q", got, tt.line)
+			}
+		})
+	}
+}
+
+func TestParseLineKeepsValidUTF8ContainingMetaByte(t *testing.T) {
+	entry := ParseLine(5, "echo ăx")
+
+	want := Entry{
+		Raw:     "echo ăx",
+		Command: "echo ăx",
+		Format:  FormatPlain,
+		LineNo:  5,
+	}
+	if !reflect.DeepEqual(entry, want) {
+		t.Fatalf("ParseLine() = %#v, want %#v", entry, want)
+	}
+	if got := entry.Serialize(); got != want.Raw {
+		t.Fatalf("Serialize() = %q, want %q", got, want.Raw)
+	}
+}
+
 func TestParseLineMalformedZshLookingHistoryWithSemicolon(t *testing.T) {
 	entry := ParseLine(11, ": not-a-timestamp:0;aws_secret_access_key=secret")
 

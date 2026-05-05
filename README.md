@@ -6,7 +6,7 @@ Safe, explainable shell history cleanup in Go.
 
 ## Features
 
-- First-class zsh history support
+- First-class zsh history support, including zsh-metafied command decoding
 - Dry-run by default for safe previews
 - Explain every removal with rule-based reasons
 - Remove duplicates while keeping the latest occurrence

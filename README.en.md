@@ -6,7 +6,7 @@
 
 ## Features
 
-- First-class zsh history support, including extended history lines
+- First-class zsh history support, including extended history lines and zsh-metafied command decoding
 - Dry-run by default
 - Reasoned removals for every dropped entry
 - Duplicate removal while keeping the latest occurrence

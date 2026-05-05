@@ -3,9 +3,14 @@ package history
 import (
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
-const zshExtendedPrefix = ": "
+const (
+	zshExtendedPrefix = ": "
+	zshMetaByte       = 0x83
+	zshMetaMask       = 0x20
+)
 
 // ParseLine parses one zsh history line. Line numbers are 1-based when called
 // from ParseContent, but callers may provide any source line number they track.
@@ -19,7 +24,7 @@ func ParseLine(lineNo int, line string) Entry {
 		return parseExtendedLine(entry, line)
 	}
 
-	entry.Command = line
+	entry.Command = unmetafy(line)
 	entry.Format = FormatPlain
 	return entry
 }
@@ -41,7 +46,7 @@ func parseExtendedLine(entry Entry, line string) Entry {
 		return malformedEntry(entry)
 	}
 
-	entry.Command = rest[semicolon+1:]
+	entry.Command = unmetafy(rest[semicolon+1:])
 	entry.Timestamp = &timestamp
 	entry.Duration = &duration
 	entry.Format = FormatZshExtended
@@ -49,12 +54,32 @@ func parseExtendedLine(entry Entry, line string) Entry {
 }
 
 func malformedEntry(entry Entry) Entry {
-	entry.Command = entry.Raw
+	command := entry.Raw
 	if semicolon := strings.IndexByte(entry.Raw, ';'); semicolon >= 0 {
-		entry.Command = entry.Raw[semicolon+1:]
+		command = entry.Raw[semicolon+1:]
 	}
+	entry.Command = unmetafy(command)
 	entry.Format = FormatMalformed
 	return entry
+}
+
+func unmetafy(text string) string {
+	metaAt := strings.IndexByte(text, zshMetaByte)
+	if metaAt < 0 || utf8.ValidString(text) {
+		return text
+	}
+
+	out := make([]byte, 0, len(text))
+	out = append(out, text[:metaAt]...)
+	for i := metaAt; i < len(text); i++ {
+		if text[i] == zshMetaByte && i+1 < len(text) {
+			out = append(out, text[i+1]^zshMetaMask)
+			i++
+			continue
+		}
+		out = append(out, text[i])
+	}
+	return string(out)
 }
 
 // ParsedHistory is a full parsed history file, including file-level newline

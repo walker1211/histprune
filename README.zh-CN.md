@@ -6,7 +6,7 @@
 
 ## 特性
 
-- first-class 支持 zsh history，包括 extended history 格式
+- first-class 支持 zsh history，包括 extended history 格式和 zsh metafication 解码
 - 默认 dry-run，只预览不写入
 - 每条删除记录都有原因说明
 - 去重时保留最后一次出现的命令
