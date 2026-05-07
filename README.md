@@ -16,10 +16,18 @@ Safe, explainable shell history cleanup in Go.
 
 ## Quick Start
 
-Install:
+Install from GitHub Releases:
+
+```bash
+tar -xzf histprune_<tag>_<os>_<arch>.tar.gz
+./histprune --help
+```
+
+Or build from source:
 
 ```bash
 go install github.com/walker1211/histprune/cmd/histprune@latest
+histprune --help
 ```
 
 Analyze your default zsh history file:

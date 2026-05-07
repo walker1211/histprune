@@ -17,18 +17,25 @@
 
 ## 安装
 
-安装 CLI：
+优先从 GitHub Releases 下载发布包并解压：
+
+```bash
+tar -xzf histprune_<tag>_<os>_<arch>.tar.gz
+./histprune --help
+```
+
+也可以用 Go 从源码安装：
 
 ```bash
 go install github.com/walker1211/histprune/cmd/histprune@latest
-histprune version
+histprune --help
 ```
 
 仓库本地开发时可以用脚本构建二进制：
 
 ```bash
-./build.sh
-./histprune version
+bash ./build.sh
+./histprune --help
 ```
 
 ## 快速开始
@@ -183,8 +190,7 @@ histprune restore /path/to/.zsh_history.histprune-backup-20260504T120000
 ## 开发 / 测试
 
 ```bash
-go test ./...
-go vet ./...
+bash ./scripts/ci-local.sh
 ```
 
 ## Roadmap
@@ -194,7 +200,7 @@ go vet ./...
 - 备份轮转
 - secret redaction
 - typo / failed command 分析
-- Homebrew / release automation
+- Homebrew 打包
 
 ## License
 

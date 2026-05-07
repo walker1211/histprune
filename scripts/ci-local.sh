@@ -8,6 +8,9 @@ repo_root=$(cd "$script_dir/.." && pwd)
 run_checks() {
   local dir=$1
 
+  printf '==> secret scan\n'
+  "$repo_root/scripts/secret-scan.sh" --current --current-root "$dir" --history
+
   printf '==> gofmt\n'
   unformatted=$(gofmt -l "$dir")
   if [[ -n "$unformatted" ]]; then

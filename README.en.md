@@ -17,18 +17,25 @@
 
 ## Installation
 
-Install the CLI:
+Download a release archive from GitHub Releases and unpack it:
+
+```bash
+tar -xzf histprune_<tag>_<os>_<arch>.tar.gz
+./histprune --help
+```
+
+Or install from source with Go:
 
 ```bash
 go install github.com/walker1211/histprune/cmd/histprune@latest
-histprune version
+histprune --help
 ```
 
 For local development, you can build a binary with the helper script:
 
 ```bash
-./build.sh
-./histprune version
+bash ./build.sh
+./histprune --help
 ```
 
 ## Quick Start
@@ -183,8 +190,7 @@ Restoring creates a backup of the current history file first.
 ## Development / Testing
 
 ```bash
-go test ./...
-go vet ./...
+bash ./scripts/ci-local.sh
 ```
 
 ## Roadmap
@@ -194,7 +200,7 @@ go vet ./...
 - backup retention
 - secret redaction
 - typo / failed-command analysis
-- Homebrew / release automation
+- Homebrew packaging
 
 ## License
 

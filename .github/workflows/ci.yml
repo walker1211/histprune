@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    tags-ignore: ["v*"]
   pull_request:
 
 jobs:
@@ -10,12 +11,17 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
           cache: true
+
+      - name: Run secret scan
+        run: bash ./scripts/secret-scan.sh --current --history
 
       - name: Check gofmt
         run: test -z "$(gofmt -l .)"
