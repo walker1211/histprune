@@ -106,7 +106,7 @@ jobs:
           if gh release view "${TAG_NAME}" --repo "${GH_REPO}" >/dev/null 2>&1; then
             gh release view "${TAG_NAME}" --repo "${GH_REPO}" --json assets --jq '.assets[].name' | while IFS= read -r asset; do
               case "$asset" in
-                histprune-*.tar.gz|histprune_*.tar.gz|checksums.txt)
+                histprune-darwin-amd64.tar.gz|histprune-darwin-arm64.tar.gz|histprune-linux-amd64.tar.gz|histprune-linux-arm64.tar.gz|histprune_${TAG_NAME}_Darwin_arm64.tar.gz|histprune_${TAG_NAME}_Darwin_x86_64.tar.gz|histprune_${TAG_NAME}_Linux_arm64.tar.gz|histprune_${TAG_NAME}_Linux_x86_64.tar.gz|checksums.txt)
                   gh release delete-asset "${TAG_NAME}" "$asset" --repo "${GH_REPO}" --yes
                   ;;
               esac
