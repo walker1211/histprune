@@ -2,8 +2,6 @@
 
 # histprune
 
-[English](./README.md)
-
 `histprune` 是一个用 Go 写的 shell history 清理工具，第一版重点支持 zsh。它的目标不是“聪明地替你猜哪些命令错了”，而是安全、可解释、可恢复地清理历史记录。
 
 ## 特性
